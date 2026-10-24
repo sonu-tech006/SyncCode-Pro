@@ -1,0 +1,42 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: synccode-backend
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/synccode_db}
+      auto-index-creation: true
+
+synccode:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:c3luY2NvZGUtc2VjdXJlLWp3dC0yNTYtYml0LXNlY3JldC1rZXktd2l0aC1lbm91Z2gtZW50cm9weQ==}
+      expiration-ms: 86400000 # 24 hours
+  livekit:
+    url: ${LIVEKIT_URL:}
+    api-key: ${LIVEKIT_API_KEY:}
+    api-secret: ${LIVEKIT_API_SECRET:}
+  # Code Execution is OPTIONAL. Default is disabled (empty URL).
+  # No paid third-party API is required. If set to an isolated self-hosted Judge0 or Docker sandbox, execution is enabled.
+  execution:
+    service-url: ${EXECUTION_SERVICE_URL:}
+    api-key: ${EXECUTION_API_KEY:}
+    timeout-seconds: ${EXECUTION_TIMEOUT_SECONDS:5}
+  collaboration:
+    port: ${COLLABORATION_PORT:1234}
+  cors:
+    allowed-origins: ${FRONTEND_ORIGIN:http://localhost:3000,http://localhost:5173}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

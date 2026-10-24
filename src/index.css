@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --synccode-accent: #6366f1;
+  --synccode-accent-rgb: 99, 102, 241;
+  --synccode-contrast: #ffffff;
+  --synccode-surface: rgba(99, 102, 241, 0.12);
+  --synccode-border: rgba(99, 102, 241, 0.28);
+}
+
+/* ==========================================================================
+   DEFAULT & DARK PRO IDE THEME (High-Contrast Obsidian & Navy Developer Theme)
+   ========================================================================== */
+html.synccode-dark-theme,
+body.synccode-dark-theme {
+  background-color: #030712 !important;
+  color: #f8fafc !important;
+  color-scheme: dark;
+}
+
+/* ==========================================================================
+   SOFT LIGHT STUDIO THEME (Refined Warm Slate — NEVER harsh pure white glare)
+   Inspired by Vercel & GitHub Light: Clean, readable, balanced without harsh glare
+   ========================================================================== */
+html.synccode-white-theme,
+body.synccode-white-theme {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  color-scheme: light;
+}
+
+/* Preserved Pro Developer Windows:
+   Keep IDE code mockups and Monaco editor containers sleek & readable */
+.mock-window-preview {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+/* ==========================================================================
+   RANDOM COLOR THEME (Harmonious Tint with The Color API)
+   ========================================================================== */
+html.synccode-random-theme,
+body.synccode-random-theme {
+  background: radial-gradient(circle at 50% 0%, var(--synccode-surface) 0%, #030712 70%) !important;
+  color: #f8fafc !important;
+  color-scheme: dark;
+}
+
+.synccode-random-theme header {
+  border-bottom-color: var(--synccode-border) !important;
+}
+
+/* ==========================================================================
+   SCROLLBAR & BASE ACCENTS
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
+}

@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # MongoDB Atlas / Local Replica Set
+  mongodb:
+    image: mongo:7.0
+    container_name: synccode-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: synccode_db
+    volumes:
+      - mongo_data:/data/db
+
+  # Spring Boot Java 21 Backend
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../deployment/Dockerfile.backend
+    container_name: synccode-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      MONGODB_URI: mongodb://mongodb:27017/synccode_db
+      JWT_SECRET: c3luY2NvZGUtc2VjdXJlLWp3dC0yNTYtYml0LXNlY3JldC1rZXktd2l0aC1lbm91Z2gtZW50cm9weQ==
+      LIVEKIT_URL: https://synccode-demo.livekit.cloud
+      LIVEKIT_API_KEY: devkey
+      LIVEKIT_API_SECRET: secret_for_signing_room_tokens
+      FRONTEND_ORIGIN: http://localhost:3000
+    depends_on:
+      - mongodb
+
+  # Dedicated Yjs Collaboration Service
+  collaboration:
+    build:
+      context: ../collaboration-service
+      dockerfile: ../deployment/Dockerfile.collab
+    container_name: synccode-collaboration
+    restart: always
+    ports:
+      - "1234:1234"
+    environment:
+      COLLABORATION_PORT: 1234
+      MONGODB_URI: mongodb://mongodb:27017/synccode_db
+      ALLOWED_ORIGIN: http://localhost:3000
+      JWT_SECRET: c3luY2NvZGUtc2VjdXJlLWp3dC0yNTYtYml0LXNlY3JldC1rZXktd2l0aC1lbm91Z2gtZW50cm9weQ==
+    depends_on:
+      - mongodb
+
+  # Vite React Frontend
+  frontend:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.frontend
+    container_name: synccode-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080/api/v1
+      VITE_COLLABORATION_WS_URL: ws://localhost:1234
+      VITE_LIVEKIT_URL: wss://synccode-demo.livekit.cloud
+    depends_on:
+      - backend
+      - collaboration
+
+volumes:
+  mongo_data:

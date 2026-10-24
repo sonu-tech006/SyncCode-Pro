@@ -1,0 +1,15 @@
+{
+  "name": "synccode-collaboration-service",
+  "version": "1.0.0",
+  "description": "Dedicated Yjs CRDT Collaboration WebSocket Service for SyncCode",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "yjs": "^13.6.14",
+    "y-websocket": "^2.0.4",
+    "ws": "^8.18.0",
+    "dotenv": "^16.4.5"
+  }
+}

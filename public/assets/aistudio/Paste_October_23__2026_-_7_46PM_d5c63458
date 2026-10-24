@@ -1,0 +1,902 @@
+# MASTER BUILD PROMPT: SyncCode — Real-Time Collaborative Coding & Video Calling Platform
+
+Act as a senior full-stack engineer, software architect, UI/UX designer, security engineer, and QA engineer.
+
+Build a complete, functional, internet-connected web application called **SyncCode**. It is a collaborative coding workspace where 4–6 users can join the same room, write code simultaneously, see live changes, communicate through audio/video calls, share their screens, discuss code in chat, and save project versions.
+
+This is a real software engineering project intended for a Java Full Stack Developer portfolio. Do not build only a landing page, static dashboard, UI mockup, or frontend simulation. Implement the real frontend, Java backend, database persistence, real-time collaboration, calling integration, authentication, error handling, tests, and deployment configuration.
+
+If the environment cannot generate all files in one pass, build the project incrementally and maintain a checklist of completed and remaining features. Never claim a feature works until its implementation and configuration are present.
+
+# 1. Product Identity
+
+Product name: SyncCode
+
+Tagline: “Code Together. Talk in Real Time.”
+
+Description:
+A shared online coding environment for students, developers, coding partners, hackathon teams, and remote engineering groups.
+
+Create an original professional logo combining:
+- A code symbol such as `</>`
+- Two connected nodes or collaborators
+- A subtle live synchronization indicator
+
+Create a matching favicon and use the brand identity throughout the application.
+
+# 2. Technology Stack
+
+## Frontend
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Monaco Editor for code editing
+- Yjs and y-monaco for collaborative editor state
+- A compatible Yjs WebSocket provider for collaboration synchronization
+- LiveKit React SDK for audio/video meetings
+- Socket.IO client or native WebSocket client only where appropriate for room events and chat
+- Lucide React icons
+- Recharts for dashboard analytics
+- React Hook Form and Zod for forms and validation
+
+Use maintained, mutually compatible package versions. Pin dependencies and document the versions used.
+
+## Main backend
+- Java 21
+- Spring Boot 3.x
+- Spring Security
+- Spring Data MongoDB
+- JWT-based authentication
+- Bean Validation
+- REST APIs
+- WebSocket support for room presence, signaling if required, and lightweight events
+- Swagger/OpenAPI
+- JUnit 5 and Mockito
+
+## Collaboration service
+Use a dedicated Yjs-compatible WebSocket collaboration service for CRDT-based document synchronization. Prefer a dedicated Node.js service using y-websocket or another compatible maintained Yjs server.
+
+The Java Spring Boot application remains the main application backend for authentication, business logic, room permissions, project metadata, snapshots, and persistent storage.
+
+The collaboration service must validate room access using a secure backend-issued authorization mechanism. Never trust an arbitrary room ID supplied by a client.
+
+Do not attempt to implement a custom CRDT from scratch unless necessary.
+
+## Audio/video calling
+Use LiveKit for WebRTC-based audio, video, and screen sharing.
+
+The Spring Boot backend must generate short-lived, room-scoped LiveKit access tokens using a compatible server SDK or a correctly implemented, tested signing mechanism.
+
+LiveKit URL and credentials must come from environment variables.
+
+Do not use a fake video-call screen, simulated participant tiles, or randomly generated user avatars as a substitute for a real call.
+
+## Database
+- MongoDB Atlas for production
+- Local MongoDB support for development
+- Persistent database storage for users, projects, rooms, memberships, file metadata, snapshots, and activity history
+
+## Deployment
+Design the application so the frontend, Java backend, collaboration service, and MongoDB can be configured and deployed independently.
+
+Use environment variables and provide deployment instructions for all required services.
+
+# 3. Architecture and System Boundaries
+
+Create a monorepo with a structure similar to:
+
+synccode/
+  frontend/
+  backend/
+  collaboration-service/
+  deployment/
+  docs/
+  README.md
+  .gitignore
+
+Frontend responsibilities:
+- Authentication screens
+- Dashboard and project navigation
+- Monaco Editor integration
+- Collaborative editing
+- Calling UI and LiveKit connection
+- Chat and participant list
+- Snapshot interface
+- Theme and user preferences
+
+Spring Boot responsibilities:
+- Authentication and authorization
+- User profile management
+- Room creation and membership
+- Room capacity enforcement
+- Project and file metadata
+- MongoDB persistence
+- Snapshot management
+- Room history
+- Invitation and access-token generation
+- Audit events and API validation
+
+Collaboration service responsibilities:
+- Real-time Yjs document synchronization
+- Room/document presence
+- Concurrent editing without lost updates
+- Authenticated access to collaboration documents
+
+LiveKit responsibilities:
+- Audio and video transport
+- Participant connection
+- Microphone and camera media
+- Screen sharing
+- Media quality and reconnect handling
+
+Do not mix LiveKit media transport with code synchronization. They are separate systems.
+
+# 4. Professional UI and Design
+
+Build a premium developer-tool interface inspired by modern online IDEs.
+
+## Visual design
+- Deep navy and graphite surfaces for the coding workspace
+- White or light-grey surfaces for the landing page and settings
+- Indigo, electric blue, and violet accents
+- Excellent typography
+- Thin borders, restrained shadows, consistent spacing
+- Clean iconography
+- Subtle transitions
+- Accessible contrast
+- Responsive desktop and tablet layouts
+- Mobile-friendly dashboard and call controls
+
+Do not overuse gradients or animations. Prioritize usability and code-editor space.
+
+## Theme selector
+Provide two modes:
+1. White Theme: white background, light-grey panels, dark text, blue accents.
+2. Random Color Theme: call a suitable random color API, such as The Color API, to obtain a new accent color.
+
+Build a coordinated palette from the returned color. Preserve readable text contrast and use a local fallback palette if the API fails.
+
+Include a visible toggle in the navbar and settings page. Save the user's selected theme in MongoDB and restore it after login.
+
+Also support editor themes such as:
+- VS Dark
+- Light
+- Monokai
+
+The application theme and editor theme can be controlled separately.
+
+# 5. Landing Page
+
+Build a complete public landing page with:
+- SyncCode logo and navigation
+- Hero headline: “Your Team. One Editor. Zero Delays.”
+- Subtitle explaining real-time collaboration and integrated calling
+- Get Started button
+- Explore Workspace button
+- Animated or realistic workspace preview
+- Features section
+- How It Works section
+- Technology section
+- Security and privacy section
+- FAQ
+- Footer with Privacy, Terms, Documentation, and Contact
+
+Do not show fake customer logos, fabricated user counts, or unsupported uptime claims.
+
+# 6. Authentication and User Accounts
+
+Implement real authentication.
+
+## Sign up
+Fields:
+- Full name
+- Email
+- Password
+- Confirm password
+
+Features:
+- Email validation
+- Strong password validation
+- Duplicate email detection
+- BCrypt password hashing
+- Helpful error messages
+- Terms acceptance checkbox
+
+## Login
+- Email and password
+- Proper invalid-credential errors
+- Session restoration
+- Logout
+- Protected routes
+
+## Account features
+- User profile
+- Avatar upload or initials-based avatar
+- Change password
+- Forgot-password workflow
+- Reset-password token flow
+- Account deletion
+- Theme preferences
+
+Use Spring Security and secure authentication.
+
+Prefer HttpOnly, Secure cookies with appropriate SameSite settings and CSRF protection when using cookie-based authentication. If bearer tokens are used instead, implement a documented secure token-storage and refresh strategy. Never place signing secrets in frontend code.
+
+Do not leave authentication as hardcoded frontend state.
+
+Every user's private projects, files, room history, snapshots, and preferences must be stored in MongoDB and restored after logging in again.
+
+Enforce ownership and permissions in the backend.
+
+# 7. Dashboard
+
+After login, display:
+- Welcome message
+- Create New Room button
+- Join Room button
+- Recent projects
+- Recent coding rooms
+- Active invitations
+- Saved snapshots
+- Recent activity
+- Profile completion
+- Theme selector
+
+Each project card should show:
+- Project name
+- Language
+- Last modified time
+- Owner
+- Collaborator count
+- Open Workspace button
+
+Support search, sorting, pagination, empty states, loading states, and error recovery.
+
+# 8. Room Creation and Invitations
+
+Users must be able to create a coding room with:
+- Room name
+- Optional description
+- Programming language
+- Visibility: Private or Invite Only
+- Optional password or invitation requirement
+- Maximum participant count: default 6, never more than 6 for a room
+- Owner and membership permissions
+
+After creating a room:
+- Generate a cryptographically secure invitation token
+- Display a shareable invitation URL
+- Provide Copy Invite Link
+- Allow invitation revocation
+- Show room ID and room status
+- Permit the owner to manage members
+
+Implement the Join Room flow:
+- Join by invitation URL or room code
+- Validate access on the backend
+- Reject invalid or expired invitations
+- Reject revoked invitations
+- Reject full rooms
+- Reject banned or unauthorized members
+- Show clear explanations for errors
+
+Enforce the maximum of 6 active room participants on the backend. Do not rely only on disabling a frontend button.
+
+Handle simultaneous join requests safely so that two requests cannot exceed the room capacity.
+
+Room membership roles:
+- Owner
+- Editor
+- Viewer
+
+Owners can manage the room and permissions. Editors can edit shared files. Viewers can observe and use permitted collaboration features without modifying code.
+
+# 9. Collaborative Code Editor
+
+Use Monaco Editor for a professional coding experience.
+
+Support these languages initially:
+- Java
+- JavaScript
+- TypeScript
+- Python
+- C++
+- C
+- HTML
+- CSS
+- JSON
+- SQL
+- Markdown
+
+Implement:
+- Syntax highlighting
+- Line numbers
+- Code folding
+- Search and replace
+- Find in file
+- Editor font-size controls
+- Word wrap
+- Minimap toggle
+- Light and dark editor themes
+- Language selection
+- Tab management
+- Keyboard shortcuts
+- Unsaved-change indicator
+
+## Real-time multi-user editing
+
+Use Yjs with a compatible Yjs WebSocket provider and Monaco binding.
+
+Requirements:
+- Multiple users edit the same document at the same time.
+- Every connected editor receives remote changes promptly.
+- Concurrent edits must converge without overwriting unrelated changes.
+- Show participant names and distinct cursor/selection colors.
+- Show live presence and connection status.
+- Support reconnection after network interruptions.
+- Restore the shared document state after reconnecting.
+- Prevent viewers from modifying shared documents.
+- Validate membership before accepting document connections.
+
+Do not implement collaboration by repeatedly replacing the entire editor value on every keystroke. Use a proper collaborative editing model.
+
+Use a stable document identifier per project and file.
+
+# 10. Project File Explorer
+
+Create a shared project file tree.
+
+Users with editor permission can:
+- Create files
+- Create folders
+- Rename files
+- Delete files with confirmation
+- Open multiple files
+- Switch between files
+- Save and restore file content
+- Select programming language per file
+
+Initially support a safe virtual project filesystem in MongoDB rather than unrestricted access to the host filesystem.
+
+Prevent path traversal and unauthorized file operations.
+
+Keep metadata and document synchronization state consistent. Define how document content is persisted to MongoDB and how stale updates are resolved.
+
+Avoid saving every keystroke as a separate MongoDB document. Use debounced persistence, checkpoints, and controlled snapshot creation.
+
+# 11. Real-Time Participant Presence
+
+Show:
+- Current online participants
+- Name and avatar/initials
+- Owner/editor/viewer badge
+- Current active file
+- Connection status
+- Last activity where appropriate
+
+Update presence when users join, disconnect, reconnect, or leave.
+
+Clean up stale presence after unexpected disconnections.
+
+Do not treat a disconnected user as an active room participant indefinitely.
+
+# 12. Audio and Video Calling — Must Actually Work
+
+Use LiveKit WebRTC rather than a fake call UI.
+
+A room should support up to 6 total active participants, including the room creator.
+
+Implement:
+- Join call
+- Leave call
+- Microphone on/off
+- Camera on/off
+- Participant video tiles
+- Audio-only participants
+- Active speaker indication
+- Participant names
+- Connection status
+- Device selection where supported
+- Camera and microphone permission errors
+- Reconnect handling
+- Call duration
+- Screen sharing
+- Responsive call layout
+- Full-screen participant view
+- Minimized call panel while coding
+- Call toolbar
+- Call ended state
+
+Users must be able to write code while remaining in the call.
+
+## Call authorization
+When a user clicks Join Call:
+1. Frontend calls an authenticated Spring Boot endpoint.
+2. Backend verifies room membership and capacity.
+3. Backend issues a short-lived LiveKit token restricted to the correct room and identity.
+4. Frontend connects to the configured LiveKit server.
+5. Participant appears only after a real successful connection.
+
+Never expose the LiveKit API secret in frontend JavaScript.
+
+Prevent unauthorized users from obtaining call tokens.
+
+Enforce the 6-participant limit through server-side room configuration or an appropriate LiveKit server-side admission mechanism, not just the frontend.
+
+If a user has joined the coding room but not the call, distinguish coding-room presence from active call presence.
+
+## Screen sharing
+Use the LiveKit screen-sharing API. Display a clear indication when sharing is active and allow the user to stop sharing.
+
+If screen capture is unsupported or permission is denied, show an understandable error.
+
+Screen sharing and media permissions require a secure context, normally HTTPS or localhost during development.
+
+## Production requirements
+Configure:
+- LiveKit server URL
+- LiveKit API key
+- LiveKit API secret
+- Appropriate TURN/STUN infrastructure through LiveKit configuration
+
+Use a hosted LiveKit service or a properly configured self-hosted deployment.
+
+Do not claim reliable calling over arbitrary internet networks until the TURN configuration has been tested.
+
+If calling credentials are absent, show a clearly labelled configuration-required state and instructions. Never silently simulate a successful call.
+
+# 13. Real-Time Room Chat
+
+Implement a shared room chat with:
+- Text messages
+- Sender name
+- Timestamp
+- Message history
+- Online presence
+- Scroll-to-latest behavior
+- Unread count
+- Basic message length limits
+- Rate limiting
+- Proper permission checks
+
+Persist chat messages in MongoDB and deliver new messages in real time.
+
+Provide useful reconnect and message-send error states.
+
+Do not store secrets or authentication tokens in chat logs.
+
+# 14. Version Snapshots and History
+
+Users with suitable permissions can create a named snapshot of the shared project.
+
+Each snapshot contains:
+- Project ID
+- File identifiers
+- File content or content references
+- Snapshot name
+- Created by
+- Created timestamp
+- Optional description
+
+Features:
+- Create snapshot
+- Browse snapshot history
+- Compare snapshots
+- View file differences
+- Restore an earlier snapshot with confirmation
+- Show who created the snapshot
+
+Snapshot restore must be treated as a shared document update and synchronized with connected users.
+
+Protect snapshot history from unauthorized access.
+
+Use controlled snapshot creation instead of creating a snapshot on every keystroke.
+
+# 15. Code Execution and Output Panel
+
+Add a code execution interface, but implement it safely.
+
+The execution service must run code in an isolated sandbox, not inside the Spring Boot application process.
+
+Use a configurable sandbox provider such as a properly configured Judge0 deployment, or a dedicated containerized execution service with strong resource restrictions.
+
+Support only languages configured by the execution provider.
+
+The UI should show:
+- Run Code button
+- Standard output
+- Standard error
+- Compilation errors
+- Exit status
+- Execution duration
+- Clear output
+- Running state
+- Timeout state
+
+Apply strict time, memory, output-size, process, filesystem, and network limits.
+
+Never execute arbitrary user code using Java Runtime.exec directly on the application server.
+
+Do not claim code execution is available if the sandbox URL or credentials have not been configured.
+
+If the execution provider is unavailable, keep editing and collaboration functional and display setup instructions for the execution feature.
+
+# 16. Additional Developer Features
+
+Implement:
+- Room description and project metadata
+- Shared notes or Markdown file
+- Copy code snippet
+- Export individual files
+- Download project files as a ZIP if implemented safely
+- Keyboard shortcuts reference
+- Reconnect indicator
+- Network latency display where measurable
+- Last saved indicator
+- Collaboration connection health
+- Error boundary and retry buttons
+- Accessible tooltips
+- Notification center
+- Optional read-only presentation mode
+
+Do not fabricate latency measurements or connection statistics.
+
+# 17. MongoDB Data Model
+
+Design MongoDB collections with indexes and ownership enforcement.
+
+Suggested collections:
+
+## users
+- id
+- name
+- normalizedEmail
+- passwordHash
+- roles
+- avatar
+- themePreference
+- createdAt
+- updatedAt
+
+## projects
+- id
+- ownerId
+- name
+- description
+- defaultLanguage
+- visibility
+- createdAt
+- updatedAt
+
+## rooms
+- id
+- projectId
+- ownerId
+- name
+- invitationTokenHash
+- invitationExpiresAt
+- invitationRevoked
+- maxParticipants
+- status
+- createdAt
+- updatedAt
+
+## roomMemberships
+- id
+- roomId
+- userId
+- role
+- joinedAt
+- status
+
+## files
+- id
+- projectId
+- parentFolderId
+- name
+- path
+- language
+- documentId
+- createdAt
+- updatedAt
+
+## snapshots
+- id
+- projectId
+- roomId
+- createdBy
+- name
+- description
+- fileContentsOrReferences
+- createdAt
+
+## chatMessages
+- id
+- roomId
+- senderId
+- message
+- createdAt
+
+## activityEvents
+- id
+- projectId
+- roomId
+- actorId
+- eventType
+- metadata
+- createdAt
+
+## userPreferences
+- id
+- userId
+- appTheme
+- editorTheme
+- fontSize
+- wordWrap
+- updatedAt
+
+Design indexes for normalized email, room IDs, membership lookups, project ownership, snapshot history, and chat pagination.
+
+Avoid unbounded documents. Use pagination for chat and activity history.
+
+Never return password hashes, invitation secrets, or private token material to clients.
+
+## Persistence of collaborative documents
+Use Yjs state updates or equivalent checkpoints to persist the shared document state safely. Define a durable document persistence strategy that survives collaboration-service restarts.
+
+The Java backend should store project/file metadata and snapshot information. The collaboration service must restore the latest persisted Yjs state when a room document is opened.
+
+Do not use in-memory-only shared state as the production persistence mechanism.
+
+# 18. REST API
+
+Implement versioned endpoints under `/api/v1`.
+
+Authentication:
+- POST `/auth/register`
+- POST `/auth/login`
+- POST `/auth/refresh`
+- POST `/auth/logout`
+- POST `/auth/forgot-password`
+- POST `/auth/reset-password`
+- GET `/auth/me`
+
+Projects:
+- POST `/projects`
+- GET `/projects`
+- GET `/projects/{projectId}`
+- PUT `/projects/{projectId}`
+- DELETE `/projects/{projectId}`
+
+Files:
+- POST `/projects/{projectId}/files`
+- GET `/projects/{projectId}/files`
+- PUT `/projects/{projectId}/files/{fileId}`
+- DELETE `/projects/{projectId}/files/{fileId}`
+
+Rooms:
+- POST `/rooms`
+- GET `/rooms/{roomId}`
+- POST `/rooms/{roomId}/join`
+- POST `/rooms/{roomId}/leave`
+- GET `/rooms/{roomId}/participants`
+- POST `/rooms/{roomId}/invitations`
+- POST `/rooms/{roomId}/invitations/revoke`
+- PATCH `/rooms/{roomId}/members/{userId}/role`
+
+Calling:
+- POST `/rooms/{roomId}/call-token`
+
+Snapshots:
+- POST `/projects/{projectId}/snapshots`
+- GET `/projects/{projectId}/snapshots`
+- GET `/snapshots/{snapshotId}`
+- POST `/snapshots/{snapshotId}/restore`
+
+Chat:
+- GET `/rooms/{roomId}/messages`
+- POST `/rooms/{roomId}/messages`
+
+Preferences:
+- GET `/users/me/preferences`
+- PUT `/users/me/preferences`
+
+System:
+- GET `/api/v1/health`
+
+Implement correct HTTP status codes, request validation, pagination, centralized exception handling, and a consistent error response format.
+
+Document APIs with Swagger/OpenAPI.
+
+Do not allow client-supplied user IDs to determine the authenticated identity. Derive identity from the verified authentication context.
+
+# 19. Security
+
+Implement:
+- BCrypt password hashing
+- Spring Security authorization
+- Strong input validation
+- Room membership checks
+- Project ownership checks
+- Invitation expiry and revocation
+- Server-side participant limit enforcement
+- Rate limiting on authentication and invitation endpoints
+- Secure token generation
+- Secure cookie configuration if cookie authentication is used
+- CSRF protection where applicable
+- Explicit CORS origins
+- HTTPS in production
+- Secure upload handling if file upload is implemented
+- Protection against path traversal
+- Safe output rendering in chat
+- Secrets stored only in environment variables
+- Privacy-aware logging
+- Dependency updates and vulnerability checks
+
+Never expose secrets in the frontend, source control, API responses, or logs.
+
+# 20. Error Handling and Reliability
+
+Handle:
+- Invalid login
+- Expired authentication
+- Full rooms
+- Invalid invitation links
+- Revoked invitations
+- Duplicate room joins
+- MongoDB connection failure
+- Collaboration server unavailable
+- WebSocket disconnection
+- Concurrent edits
+- Call connection failure
+- Camera/microphone permission denial
+- Screen-sharing failure
+- Expired LiveKit token
+- Snapshot restore conflict
+- Code execution timeout
+- API rate limits
+
+Show user-friendly messages and retry options.
+
+The rest of the application should remain usable if calling or code execution is unavailable.
+
+# 21. Testing Requirements
+
+Write automated tests.
+
+Backend tests:
+- Signup and duplicate email validation
+- Login and unauthorized API access
+- Room owner permissions
+- Viewer cannot edit
+- Invalid invitation rejection
+- Invitation expiry and revocation
+- Maximum 6 active participants under concurrent join requests
+- User cannot access another user's private project
+- Snapshot creation and restore
+- API input validation
+- Token endpoint authorization
+
+Collaboration tests:
+- Two clients editing the same document
+- Concurrent edits converge correctly
+- Reconnect restores document state
+- Unauthorized document access is rejected
+- Document persistence survives service restart
+
+Frontend tests:
+- Signup and login forms
+- Create and join room
+- Editor language selection
+- Participant controls
+- Snapshot workflow
+- Theme switching
+- Error and loading states
+
+Integration/manual tests:
+- Open the application in at least two separate browsers or devices
+- Join the same room
+- Type from both clients and verify synchronization
+- Join the same LiveKit call from multiple devices
+- Test microphone and camera controls
+- Test screen sharing
+- Restart the collaboration service and verify persistence
+- Test on different networks where possible
+
+Do not mark these tests as passed without executing them.
+
+# 22. Environment Variables
+
+Provide `.env.example` files with placeholders, including appropriate settings for:
+
+Frontend:
+- VITE_API_BASE_URL
+- VITE_COLLABORATION_WS_URL
+- VITE_LIVEKIT_URL
+
+Spring Boot backend:
+- MONGODB_URI
+- JWT_SECRET or the selected authentication signing configuration
+- FRONTEND_ORIGIN
+- LIVEKIT_URL
+- LIVEKIT_API_KEY
+- LIVEKIT_API_SECRET
+- MAIL_PROVIDER configuration if email is enabled
+- EXECUTION_SERVICE_URL if code execution is enabled
+
+Collaboration service:
+- COLLABORATION_PORT
+- MONGODB_URI or the selected persistence adapter configuration
+- Backend token validation configuration
+- Allowed origin configuration
+
+Never put server secrets in `VITE_` variables or any other frontend-exposed configuration.
+
+Use separate development and production configuration. Validate required settings at startup and provide useful errors when missing.
+
+# 23. README and Deployment
+
+Write a comprehensive README covering:
+- Project overview
+- Features
+- Architecture diagram
+- Technology stack
+- Prerequisites
+- Repository structure
+- Local setup
+- MongoDB Atlas setup
+- Backend startup
+- Frontend startup
+- Collaboration service startup
+- LiveKit setup
+- HTTPS and TURN requirements
+- Optional code-execution setup
+- Environment variable reference
+- Database indexes and seed data
+- Running tests
+- Troubleshooting
+- Deployment
+- Security considerations
+- Screenshots checklist
+
+Provide Dockerfiles and Docker Compose for the services that can reasonably run together. Document external services that require separate configuration.
+
+Do not hardcode localhost URLs in production code. Support configurable origins and URLs.
+
+# 24. Definition of Done
+
+The project is not complete until all implemented core flows work.
+
+Required core acceptance criteria:
+1. A new user can register and log in.
+2. User and project data persist in MongoDB.
+3. A user can create a private coding room.
+4. The owner can invite teammates through a shareable link.
+5. Up to 6 active participants can join a room.
+6. A seventh participant is rejected with a clear message.
+7. Multiple authorized users can edit the same file concurrently.
+8. All connected editors converge on the same code.
+9. Documents are saved durably and restored after reconnection/restart.
+10. Real audio/video calls work when LiveKit is configured.
+11. Users can mute/unmute and turn camera on/off.
+12. Screen sharing works when supported and authorized.
+13. Users can send room chat messages.
+14. Users can create and restore snapshots.
+15. Permissions prevent viewers from editing and outsiders from accessing private rooms.
+16. Theme and editor preferences persist across logins.
+17. The frontend, backend, and collaboration service run with documented commands.
+18. No critical workflow depends on fake hardcoded success responses.
+
+## Final instruction
+
+First generate the architecture and a complete file manifest. Then implement the actual files in logical stages.
+
+Prioritize a working end-to-end core over an enormous collection of incomplete features.
+
+If any external service cannot work without credentials, implement its real integration and show a clear setup-required state. Do not replace it with a mock and call it complete.
+
+Deliver maintainable, readable, well-structured code with comments for important security, concurrency, and real-time synchronization decisions.
+
+The final product should demonstrate strong Java backend engineering, secure APIs, MongoDB data persistence, concurrent collaboration, real-time communication, responsive React development, testing, and deployable architecture.
